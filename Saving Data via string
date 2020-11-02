@@ -1,0 +1,192 @@
+using System;
+using System.IO;
+using UnityEngine;
+using System.Text;
+using System.Reflection;
+
+//creating class
+public static class FileSaveStringMode
+{
+    //2 args
+    public static string[] args;
+    public static string[] argsLisr = new string[500];
+    //youre extension:
+    private const string extension = "Data";
+    
+  
+   public static void Save(string valueKey,string value)
+    {
+        //creating path(the same in each method)
+        int i = 0;
+        string path = Application.persistentDataPath;
+        args = path.Split("/".ToCharArray());
+        
+        path = "";
+        foreach (string sN in args)
+        {
+
+            if (i <= 2)
+            {
+                path += sN + "/";
+            }
+
+            i++;
+        }
+        path += Application.productName + extension;
+        //creating file
+
+        FileStream fs = new FileStream(path, FileMode.OpenOrCreate,FileAccess.Write);
+
+        fs.Close();
+        //reading file
+        StreamReader srw = new StreamReader(path);
+        argsLisr = File.ReadAllLines(path);
+        int iList = new int();
+        //trying to read file
+        try
+        {
+            if (srw.ReadLine().Length != 0)
+            {
+                //foreach line check to see if it has the key
+                foreach (string line in File.ReadAllLines(path))
+                {
+                    
+                   
+                    foreach (string word in line.ToString().Split())
+                    {
+                        Debug.Log(word);
+                        if (word == valueKey)
+                        {
+                         //replacing the file line value with the new one
+                          
+                                argsLisr[iList] = "";
+                                argsLisr[iList] = valueKey + " : " + value;
+                          
+                            
+                        }
+                        else
+                        {
+                            //do nothing
+                        }
+                    }
+                    iList++;
+                }
+                srw.Close();
+                File.WriteAllText(path, string.Empty);
+                StreamWriter sr = new StreamWriter(path, true);
+                
+                foreach (string line in argsLisr)
+                {
+                    //writing the new values into file
+                    sr.WriteLine(line);
+                }
+                sr.Close();
+
+            }
+
+            else
+            {
+                //write the first file line with that key
+                srw.Close();
+          
+                StreamWriter sr = new StreamWriter(path, true);
+                sr.WriteLine(valueKey + " : " + value);
+                sr.Flush();
+                sr.Close();
+
+            }
+        }
+        catch
+        {
+            //write the first file line
+            srw.Close();
+           
+            StreamWriter sr = new StreamWriter(path, true);
+            sr.WriteLine(valueKey + " : " + value);
+            sr.Flush();
+            sr.Close();
+
+        }
+    }
+  public static string Load( string valueKey,string backUp)
+    {
+        //some values
+        bool hasFound = false;
+        string[] argsLisr = new string[500];
+        int iList = new int();
+        string loadS = "";
+        int i = 0;
+        string path = Application.persistentDataPath;
+        args = path.Split("/".ToCharArray());
+        path = "";
+        foreach (string sN in args)
+        {
+
+            if (i <= 2)
+            {
+                path += sN + "/";
+            }
+
+            i++;
+        }
+        path += Application.productName + " Data";
+        Debug.Log(path);
+        StreamReader sr = new StreamReader(path);
+        foreach(string s_ in sr.ReadToEnd().Split())
+        {
+            Debug.Log(s_);
+        }
+     
+        sr.Close();
+        //very similar to the save method
+        foreach (string line in File.ReadAllLines(path))
+        {
+            bool isLine = new Boolean();
+            int iL = new int();
+            Debug.Log(line);
+            foreach (string word in line.ToString().Split())
+            {
+             
+                Debug.Log(word);
+                if (word == valueKey)
+                {
+                    //the key has been found
+                    hasFound = true;
+                    //is the line with the key
+                    isLine = true;
+
+                }
+                else
+                {
+                    //nothing
+                }
+                if (isLine)
+                {
+                    //remove the first 2 args(valuekey and :)
+                    if (iL >1 && iL != line.ToString().Split().Length-1)
+                    loadS += line.ToString().Split()[iL] + " ";
+                    else if(iL == line.ToString().Split().Length - 1)
+                    {
+                        loadS += line.ToString().Split()[iL];
+                    }
+                }
+                iL++;
+            }
+            iList++;
+           
+            
+
+        }
+        if (hasFound)
+        {
+            //if value  key has been found return new value
+            return loadS;
+        }
+        //else return backup
+        return backUp;
+
+
+    }
+ //code work in progress needs to be cleaned up
+   
+}
